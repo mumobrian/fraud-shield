@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Shield - Face Registration</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header h1 i {
+            color: #667eea;
+        }
+
+        .back-btn {
+            background: #f0f4ff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: #667eea;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: #e0e8ff;
+            transform: translateX(-5px);
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #f0f0f0;
+            z-index: 1;
+        }
+
+        .step {
+            position: relative;
+            z-index: 2;
+            background: white;
+            padding: 0 10px;
+            text-align: center;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .step.active .step-number {
+            background: #667eea;
+            color: white;
+        }
+
+        .step.completed .step-number {
+            background: #22c55e;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .webcam-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 20px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: #000;
+            aspect-ratio: 4/3;
+        }
+
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
+
+        .face-guide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 3px dashed rgba(255,255,255,0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .face-guide.detected {
+            border: 3px solid #22c55e;
+            box-shadow: 0 0 20px #22c55e;
+            animation: pulse 1s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .guide-text {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            font-size: 14px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.5);
+            padding: 8px;
+            z-index: 10;
+        }
+
+        .capture-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .capture-slot {
+            aspect-ratio: 1/1;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px dashed #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .capture-slot.captured {
+            border: 2px solid #22c55e;
+            background: #e0f2e9;
+        }
+
+        .capture-slot.active {
+            border: 2px solid #667eea;
+            animation: borderPulse 1s infinite;
+        }
+
+        @keyframes borderPulse {
+            0% { border-color: #667eea; }
+            50% { border-color: #22c55e; }
+            100% { border-color: #667eea; }
+        }
+
+        .slot-number {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 2;
+        }
+
+        .slot-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .slot-placeholder {
+            color: #999;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .slot-placeholder i {
+            font-size: 24px;
+            margin-bottom: 5px;
+            color: #ddd;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(34, 197, 94, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #e0e0e0;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status {
+            text-align: center;
+            margin: 15px 0;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .status.success {
+            background: #e0f2e9;
+            color: #22c55e;
+            display: block;
+        }
+
+        .status.error {
+            background: #fee2e2;
+            color: #ef4444;
+            display: block;
+        }
+
+        .progress-container {
+            width: 100%;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            font-size: 16px;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        .progress-status {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .result-container {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .result-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .result-icon.success {
+            color: #22c55e;
+        }
+
+        .result-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .result-message {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            margin: 20px auto;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <h1>
+                <i class="fas fa-camera"></i>
+                Face Recognition Setup
+            </h1>
+        </div>
+
+        <div class="main-card">
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step active" id="step1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Camera</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Capture</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Processing</div>
+                </div>
+                <div class="step" id="step4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Complete</div>
+                </div>
+            </div>
+
+            <!-- Step 1: Camera Access -->
+            <div id="step1Content">
+                <div class="webcam-container">
+                    <video id="video" autoplay playsinline></video>
+                    <div class="face-guide" id="faceGuide1"></div>
+                    <div class="guide-text" id="guideText">Click Start Camera to begin</div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="startCamera()" id="startBtn">
+                        <i class="fas fa-camera"></i> Start Camera
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Auto Capture -->
+            <div id="step2Content" class="hidden">
+                <div class="webcam-container">
+                    <video id="video2" autoplay playsinline></video>
+                    <div class="face-guide" id="faceGuide2"></div>
+                    <div class="guide-text" id="captureGuide">Position your face in the circle</div>
+                </div>
+
+                <div class="capture-grid">
+                    <div class="capture-slot active" id="slot1">
+                        <div class="slot-number">1</div>
+                        <div class="slot-placeholder" id="slot1Placeholder">
+                            <i class="fas fa-camera"></i>
+                            <div>Front</div>
+                        </div>
+                    </div>
+                    <div class="capture-slot" id="slot2">
+                        <div class="slot-number">2</div>
+                        <div class="slot-placeholder" id="slot2Placeholder">
+                            <i class="fas fa-camera"></i>
+                            <div>Left</div>
+                        </div>
+                    </div>
+                    <div class="capture-slot" id="slot3">
+                        <div class="slot-number">3</div>
+                        <div class="slot-placeholder" id="slot3Placeholder">
+                            <i class="fas fa-camera"></i>
+                            <div>Right</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="resetCapture()" id="resetBtn">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                    <button class="btn btn-success" onclick="processFaces()" id="processBtn" disabled>
+                        <i class="fas fa-check"></i> Process & Save
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Processing with Progress Bar -->
+            <div id="step3Content" class="hidden">
+                <div class="progress-container">
+                    <div class="loading-spinner"></div>
+                    <div class="progress-text" id="progressTitle">Processing Face Data...</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-status" id="progressStatus">Initializing...</div>
+                </div>
+            </div>
+
+            <!-- Step 4: Complete -->
+            <div id="step4Content" class="hidden">
+                <div class="result-container">
+                    <div class="result-icon success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="result-title">Registration Successful!</div>
+                    <div class="result-message" id="resultMessage">
+                        Your face has been registered. You can now use face login.
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="goToDashboard()">
+                            <i class="fas fa-home"></i> Go to Dashboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Messages -->
+            <div class="status" id="statusMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // FIXED FACE RECOGNITION WITH WORKING PROGRESS BAR
+        // ============================================
+
+        let videoStream = null;
+        let capturedImages = [];
+        let currentStep = 1;
+        let user = null;
+        let detectionInterval = null;
+        let currentCapturePosition = 1;
+        let isCapturing = false;
+
+        // Check if user is logged in
+        (function() {
+            const userData = localStorage.getItem('user');
+            if (!userData) {
+                window.location.href = 'login.html';
+                return;
+            }
+            user = JSON.parse(userData);
+            console.log('Logged in as:', user);
+        })();
+
+        // Start camera
+        async function startCamera() {
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: 640, 
+                        height: 480,
+                        facingMode: 'user'
+                    } 
+                });
+                
+                const video = document.getElementById('video');
+                video.srcObject = videoStream;
+                
+                const video2 = document.getElementById('video2');
+                video2.srcObject = videoStream;
+                
+                document.getElementById('guideText').textContent = 'Camera ready';
+                document.getElementById('startBtn').disabled = true;
+                
+                showStatus('Camera access granted!', 'success');
+                
+                // Move to step 2 after 1 second
+                setTimeout(() => {
+                    goToStep(2);
+                    startAutoDetection();
+                }, 1000);
+                
+            } catch (err) {
+                console.error('Camera error:', err);
+                showStatus('Could not access camera. Please check permissions.', 'error');
+            }
+        }
+
+        // Start auto face detection
+        function startAutoDetection() {
+            currentCapturePosition = 1;
+            isCapturing = false;
+            
+            // Clear any existing interval
+            if (detectionInterval) {
+                clearInterval(detectionInterval);
+            }
+            
+            // Start detection loop
+            detectionInterval = setInterval(detectFace, 500);
+            
+            updateCaptureStatus();
+        }
+
+        // Detect face position (simulated)
+        function detectFace() {
+            if (!videoStream || currentStep !== 2) return;
+            if (isCapturing) return;
+            if (currentCapturePosition > 3) return;
+            
+            const video = document.getElementById('video2');
+            if (!video || video.readyState !== 4) return;
+            
+            // Simulate face detection (random for demo)
+            // In production, this would use actual face detection
+            const detection = Math.random();
+            
+            // Update guide color based on detection
+            const guide = document.getElementById('faceGuide2');
+            
+            if (detection > 0.4) { // Simulated detection threshold
+                guide.classList.add('detected');
+                
+                // Auto capture after short delay
+                if (!isCapturing) {
+                    setTimeout(() => {
+                        autoCapture();
+                    }, 300);
+                }
+            } else {
+                guide.classList.remove('detected');
+            }
+        }
+
+        // Auto capture face
+        function autoCapture() {
+            if (isCapturing || currentCapturePosition > 3) return;
+            
+            isCapturing = true;
+            
+            const video = document.getElementById('video2');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert to base64
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
+            
+            // Store in array
+            capturedImages[currentCapturePosition - 1] = imageData;
+            
+            // Update UI
+            updateSlotUI(currentCapturePosition, imageData);
+            
+            // Move to next position after delay
+            setTimeout(() => {
+                isCapturing = false;
+                
+                if (currentCapturePosition < 3) {
+                    currentCapturePosition++;
+                    updateCaptureStatus();
+                } else {
+                    // All captures complete
+                    document.getElementById('processBtn').disabled = false;
+                    document.getElementById('faceGuide2').classList.remove('detected');
+                    
+                    // Stop detection
+                    if (detectionInterval) {
+                        clearInterval(detectionInterval);
+                    }
+                }
+            }, 1000);
+        }
+
+        // Update slot UI
+        function updateSlotUI(position, imageData) {
+            const slot = document.getElementById(`slot${position}`);
+            slot.classList.add('captured');
+            slot.classList.remove('active');
+            
+            const img = document.createElement('img');
+            img.src = imageData;
+            img.className = 'slot-image';
+            
+            const placeholder = document.getElementById(`slot${position}Placeholder`);
+            placeholder.style.display = 'none';
+            slot.appendChild(img);
+        }
+
+        // Update capture status
+        function updateCaptureStatus() {
+            // Update active slot
+            for (let i = 1; i <= 3; i++) {
+                const slot = document.getElementById(`slot${i}`);
+                if (i === currentCapturePosition && !slot.classList.contains('captured')) {
+                    slot.classList.add('active');
+                } else {
+                    slot.classList.remove('active');
+                }
+            }
+            
+            // Update guide text
+            const positions = ['front', 'left', 'right'];
+            document.getElementById('captureGuide').textContent = `Position your face (${positions[currentCapturePosition-1]} view)`;
+        }
+
+        // Reset capture
+        function resetCapture() {
+            capturedImages = [];
+            currentCapturePosition = 1;
+            isCapturing = false;
+            
+            for (let i = 1; i <= 3; i++) {
+                const slot = document.getElementById(`slot${i}`);
+                slot.classList.remove('captured', 'active');
+                slot.innerHTML = `
+                    <div class="slot-number">${i}</div>
+                    <div class="slot-placeholder" id="slot${i}Placeholder">
+                        <i class="fas fa-camera"></i>
+                        <div>${i === 1 ? 'Front' : i === 2 ? 'Left' : 'Right'}</div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('slot1').classList.add('active');
+            document.getElementById('processBtn').disabled = true;
+            document.getElementById('captureGuide').textContent = 'Position your face in the circle';
+            
+            // Restart detection
+            startAutoDetection();
+        }
+
+        // Process and save faces with working progress bar
+        async function processFaces() {
+            if (capturedImages.length < 3) {
+                showStatus('Please capture all 3 angles first', 'error');
+                return;
+            }
+            
+            // Go to step 3
+            goToStep(3);
+            
+            // Reset progress bar
+            const progressFill = document.getElementById('progressFill');
+            const progressStatus = document.getElementById('progressStatus');
+            const progressTitle = document.getElementById('progressTitle');
+            
+            progressFill.style.width = '0%';
+            progressStatus.textContent = 'Starting...';
+            
+            // Progress steps
+            const steps = [
+                { progress: 20, text: 'Analyzing facial features...' },
+                { progress: 40, text: 'Creating face descriptor...' },
+                { progress: 60, text: 'Encrypting face data...' },
+                { progress: 80, text: 'Saving to database...' },
+                { progress: 100, text: 'Complete!' }
+            ];
+            
+            // Animate progress bar
+            for (let i = 0; i < steps.length; i++) {
+                await new Promise(resolve => setTimeout(resolve, 800));
+                progressFill.style.width = steps[i].progress + '%';
+                progressStatus.textContent = steps[i].text;
+            }
+            
+            // Generate face descriptor
+            const faceDescriptor = generateFaceDescriptor();
+            
+            try {
+                // Save to server
+                const response = await fetch('api/save_face.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: user.id,
+                        face_descriptor: faceDescriptor
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update user in localStorage
+                    user.face_enabled = true;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    
+                    // Small delay before showing success
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // Go to step 4
+                    goToStep(4);
+                } else {
+                    throw new Error(data.message || 'Save failed');
+                }
+                
+            } catch (error) {
+                console.error('Save error:', error);
+                showStatus('Failed to save face data. Please try again.', 'error');
+                
+                // Go back to step 2
+                goToStep(2);
+                resetCapture();
+            }
+        }
+
+        // Generate unique face descriptor (simulated)
+        function generateFaceDescriptor() {
+            const array = new Uint8Array(128);
+            crypto.getRandomValues(array);
+            return Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Go to step
+        function goToStep(step) {
+            // Update step indicators
+            for (let i = 1; i <= 4; i++) {
+                const stepEl = document.getElementById(`step${i}`);
+                if (stepEl) {
+                    if (i < step) {
+                        stepEl.className = 'step completed';
+                    } else if (i === step) {
+                        stepEl.className = 'step active';
+                    } else {
+                        stepEl.className = 'step';
+                    }
+                }
+            }
+            
+            // Show/hide content
+            document.getElementById('step1Content').classList.add('hidden');
+            document.getElementById('step2Content').classList.add('hidden');
+            document.getElementById('step3Content').classList.add('hidden');
+            document.getElementById('step4Content').classList.add('hidden');
+            
+            document.getElementById(`step${step}Content`).classList.remove('hidden');
+            
+            currentStep = step;
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = message;
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Go back
+        function goBack() {
+            if (currentStep > 1) {
+                if (confirm('Go back? Unsaved progress will be lost.')) {
+                    stopCamera();
+                    window.location.href = 'index.html';
+                }
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Stop camera
+        function stopCamera() {
+            if (detectionInterval) {
+                clearInterval(detectionInterval);
+            }
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+        }
+
+        // Go to dashboard
+        function goToDashboard() {
+            stopCamera();
+            window.location.href = 'index.html';
+        }
+
+        // Cleanup
+        window.addEventListener('beforeunload', function() {
+            stopCamera();
+        });
+
+        // Make functions global
+        window.startCamera = startCamera;
+        window.resetCapture = resetCapture;
+        window.processFaces = processFaces;
+        window.goBack = goBack;
+        window.goToDashboard = goToDashboard;
+    </script>
+</body>
+</html>

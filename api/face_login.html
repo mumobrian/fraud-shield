@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Shield - Face Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo i {
+            font-size: 50px;
+            color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo h1 {
+            color: #333;
+            margin-top: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: #f0f0f0;
+            padding: 5px;
+            border-radius: 10px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border: none;
+            background: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .tab i {
+            margin-right: 8px;
+        }
+
+        .webcam-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #000;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 20px auto;
+            border: 4px solid #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
+
+        .scanning-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(102, 126, 234, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
+        }
+
+        .scanning-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #667eea, transparent);
+            animation: scan 2s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
+        }
+
+        .face-status {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f4ff;
+            border-radius: 10px;
+        }
+
+        .face-status i {
+            font-size: 24px;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .face-status p {
+            color: #333;
+            font-size: 14px;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .password-option {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .password-option a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .password-option a:hover {
+            text-decoration: underline;
+        }
+
+        .status {
+            text-align: center;
+            margin: 15px 0;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .status.success {
+            background: #e0f2e9;
+            color: #22c55e;
+            display: block;
+        }
+
+        .status.error {
+            background: #fee2e2;
+            color: #ef4444;
+            display: block;
+        }
+
+        .status.warning {
+            background: #fff3e0;
+            color: #f97316;
+            display: block;
+        }
+
+        .users-list {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+        .users-list h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .user-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .face-badge {
+            background: #22c55e;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 50px;
+            font-size: 11px;
+        }
+
+        .face-badge.disabled {
+            background: #999;
+        }
+
+        .demo-note {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo">
+            <i class="fas fa-shield-alt"></i>
+            <h1>Fraud Shield</h1>
+        </div>
+
+        <div class="tabs">
+            <button class="tab" onclick="switchTab('password')" id="tabPassword">
+                <i class="fas fa-key"></i> Password
+            </button>
+            <button class="tab active" onclick="switchTab('face')" id="tabFace">
+                <i class="fas fa-camera"></i> Face Login
+            </button>
+        </div>
+
+        <!-- Face Login Section -->
+        <div id="faceSection">
+            <div class="webcam-container">
+                <video id="video" autoplay playsinline></video>
+                <div class="scanning-overlay"></div>
+                <div class="scanning-line"></div>
+            </div>
+
+            <div class="face-status">
+                <i class="fas fa-face-smile"></i>
+                <p id="faceStatus">Looking for face...</p>
+            </div>
+
+            <button class="btn-login" onclick="startFaceLogin()" id="startFaceBtn">
+                <i class="fas fa-camera"></i> Start Camera
+            </button>
+
+            <button class="btn-login" onclick="verifyFace()" id="verifyFaceBtn" style="display: none;">
+                <i class="fas fa-check-circle"></i> Verify Face
+            </button>
+
+            <div class="password-option">
+                <a href="login.html">
+                    <i class="fas fa-arrow-left"></i> Use password instead
+                </a>
+            </div>
+        </div>
+
+        <!-- Status Messages -->
+        <div class="status" id="statusMessage"></div>
+
+        <!-- Users List -->
+        <div class="users-list">
+            <h3><i class="fas fa-users"></i> Users with Face Enabled:</h3>
+            <div id="usersList">Loading...</div>
+        </div>
+
+        <div class="demo-note">
+            <i class="fas fa-info-circle"></i>
+            <div>
+                <strong>Demo Mode:</strong> Face recognition is simulated. In production, this would use real facial recognition.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // FACE LOGIN - WORKING VERSION
+        // ============================================
+
+        let videoStream = null;
+        let faceDetected = false;
+        let selectedUser = null;
+
+        // Load users with face enabled
+        async function loadUsers() {
+            try {
+                const response = await fetch('api/get_face_status.php');
+                const users = await response.json();
+                
+                const listDiv = document.getElementById('usersList');
+                if (users.length === 0) {
+                    listDiv.innerHTML = '<p style="color: #999;">No users with face enabled</p>';
+                    return;
+                }
+                
+                let html = '';
+                users.forEach(user => {
+                    html += `
+                        <div class="user-item" onclick="selectUser('${user.name}')" style="cursor: pointer;">
+                            <span class="user-name">${user.name}</span>
+                            <span class="face-badge">Face Enabled</span>
+                        </div>
+                    `;
+                });
+                listDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading users:', error);
+                document.getElementById('usersList').innerHTML = '<p style="color: #999;">Error loading users</p>';
+            }
+        }
+
+        // Select user
+        function selectUser(username) {
+            selectedUser = username;
+            document.getElementById('faceStatus').innerHTML = `Selected: ${username}<br>Look at camera and click Verify`;
+        }
+
+        // Switch tabs
+        function switchTab(tab) {
+            if (tab === 'password') {
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Start camera
+        async function startFaceLogin() {
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: 640, 
+                        height: 480,
+                        facingMode: 'user'
+                    } 
+                });
+                
+                document.getElementById('video').srcObject = videoStream;
+                document.getElementById('startFaceBtn').style.display = 'none';
+                document.getElementById('verifyFaceBtn').style.display = 'block';
+                document.getElementById('faceStatus').innerHTML = 'Camera ready! Click Verify Face';
+                
+                // Simulate face detection
+                simulateFaceDetection();
+                
+            } catch (err) {
+                console.error('Camera error:', err);
+                showStatus('Could not access camera', 'error');
+            }
+        }
+
+        // Simulate face detection (for demo)
+        function simulateFaceDetection() {
+            let count = 0;
+            const interval = setInterval(() => {
+                if (!videoStream) {
+                    clearInterval(interval);
+                    return;
+                }
+                
+                count++;
+                if (count === 3) {
+                    faceDetected = true;
+                    document.getElementById('faceStatus').innerHTML = '✅ Face detected! Click Verify';
+                    clearInterval(interval);
+                } else {
+                    document.getElementById('faceStatus').innerHTML = '🔍 Scanning... ' + '•'.repeat(count);
+                }
+            }, 500);
+        }
+
+        // Verify face
+        async function verifyFace() {
+            if (!selectedUser) {
+                showStatus('Please select a user first', 'warning');
+                return;
+            }
+            
+            document.getElementById('verifyFaceBtn').disabled = true;
+            document.getElementById('verifyFaceBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            
+            try {
+                const response = await fetch('api/verify_face.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        username: selectedUser,
+                        face_detected: faceDetected 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('✅ Face verified! Logging in...', 'success');
+                    
+                    // Store user data
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    setTimeout(() => {
+                        stopCamera();
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    showStatus('❌ Face verification failed', 'error');
+                    document.getElementById('verifyFaceBtn').disabled = false;
+                    document.getElementById('verifyFaceBtn').innerHTML = '<i class="fas fa-check-circle"></i> Try Again';
+                }
+                
+            } catch (error) {
+                console.error('Verification error:', error);
+                showStatus('Verification failed', 'error');
+                document.getElementById('verifyFaceBtn').disabled = false;
+                document.getElementById('verifyFaceBtn').innerHTML = '<i class="fas fa-check-circle"></i> Try Again';
+            }
+        }
+
+        // Stop camera
+        function stopCamera() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+        }
+
+        // Show status
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = message;
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Load users on page load
+        loadUsers();
+
+        // Cleanup
+        window.addEventListener('beforeunload', function() {
+            stopCamera();
+        });
+    </script>
+</body>
+</html>

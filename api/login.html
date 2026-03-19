@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Shield - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        h1 i {
+            color: #667eea;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .input-group label i {
+            color: #667eea;
+            width: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-face {
+            width: 100%;
+            padding: 12px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            color: #667eea;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            margin-top: 10px;
+        }
+
+        .btn-face:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-face i {
+            font-size: 18px;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #ef4444;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 20px 0;
+            color: #999;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .divider span {
+            padding: 0 10px;
+            font-size: 12px;
+        }
+
+        .users-list {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+        .users-list h3 {
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .users-list h3 i {
+            color: #667eea;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .user-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .user-pass {
+            color: #666;
+            font-family: monospace;
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .face-badge {
+            background: #22c55e;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 50px;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h1>
+            <i class="fas fa-shield-alt"></i>
+            Fraud Shield
+        </h1>
+
+        <!-- Error Message -->
+        <div class="error" id="errorMessage">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorText">Invalid credentials</span>
+        </div>
+
+        <!-- Login Form -->
+        <form onsubmit="handleLogin(event)">
+            <div class="input-group">
+                <label><i class="fas fa-user"></i> Username or Email</label>
+                <input type="text" id="username" placeholder="Enter username or email" value="admin" required>
+            </div>
+
+            <div class="input-group">
+                <label><i class="fas fa-lock"></i> Password</label>
+                <input type="password" id="password" placeholder="Enter password" value="admin123" required>
+            </div>
+
+            <button type="submit" class="btn-login" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="divider">
+            <span>OR</span>
+        </div>
+
+        <!-- Face Login Button -->
+        <a href="face_login.html" class="btn-face">
+            <i class="fas fa-camera"></i> Login with Face Instead
+        </a>
+
+
+    <script>
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            // Show loading
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            loginBtn.disabled = true;
+            errorDiv.style.display = 'none';
+            
+            try {
+                console.log('Attempting login with:', { username, password });
+                
+                const response = await fetch('http://localhost/fraud-shield/api/login.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                console.log('Response status:', response.status);
+                
+                const data = await response.json();
+                console.log('Login response:', data);
+                
+                if (data.success) {
+                    // Store user data
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // Show success message
+                    loginBtn.innerHTML = '<i class="fas fa-check"></i> Success! Redirecting...';
+                    
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    // Show error
+                    errorDiv.style.display = 'flex';
+                    document.getElementById('errorText').textContent = data.message;
+                    
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+                    loginBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorDiv.style.display = 'flex';
+                document.getElementById('errorText').textContent = 'Connection error - check if XAMPP is running';
+                
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+                loginBtn.disabled = false;
+            }
+        }
+
+        // Check if already logged in
+        if (localStorage.getItem('user')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+# ============================
+# Python
+# ============================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.python-version
+*.pyc
+*.pyo
+*.pyd
+
+# ============================
+# Virtual Environment
+# ============================
+venv/
+env/
+ENV/
+.venv/
+env.bak/
+venv.bak/
+api/ml_models/venv/
+api/ml_models/env/
+api/ml_models/ENV/
+
+# ============================
+# Python Distribution / Packaging
+# ============================
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+
+# ============================
+# IDE / Editor
+# ============================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-*
+.project
+.classpath
+.settings/
+*.code-workspace
+
+# ============================
+# Logs and Databases
+# ============================
+*.log
+api/ml_server.log
+error.log
+simulation_counter.txt
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite3-journal
+logs/
+*.log.*
+
+# ============================
+# OS Generated Files
+# ============================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ============================
+# Project Specific
+# ============================
+
+# ML Models (large files - exclude but keep directory structure)
+data/models/
+!data/models/.gitkeep
+
+# Cache directories
+.cache/
+*.cache
+temp/
+tmp/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Backup files
+*.bak
+*.backup
+
+# Node modules (if you ever add npm)
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+
+# ============================
+# API Specific
+# ============================
+api/*.log
+api/temp/
+api/uploads/
+api/cache/
+
+# ============================
+# ML Models - Python compiled files
+# ============================
+api/ml_models/__pycache__/
+api/ml_models/*.pyc
+api/ml_models/.cache/
+api/ml_models/tensorflow_model/
+api/ml_models/lightning_logs/
+
+# ============================
+# Docker (if you add later)
+# ============================
+.docker/
+docker-compose.override.yml
+Dockerfile.dev
+
+# ============================
+# Testing
+# ============================
+.cache/
+.pytest_cache/
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+*.cover
+.hypothesis/
+
+# ============================
+# Windows specific
+# ============================
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# ============================
+# Archives
+# ============================
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
