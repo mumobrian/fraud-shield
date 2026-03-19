@@ -4,8 +4,8 @@
 header('Content-Type: application/json');
 
 // ===== YOUR BOT CONFIGURATION =====
-define('TELEGRAM_BOT_TOKEN', '8257991468:AAFuq3uiMfo5atJKg8ykpvb9YFKWesV8SIc');
-define('TELEGRAM_CHAT_ID', '5828853667'); // YOUR CHAT ID
+define('TELEGRAM_BOT_TOKEN', ;
+define('TELEGRAM_CHAT_ID', ''); // YOUR CHAT ID
 // =================================
 
 /**
